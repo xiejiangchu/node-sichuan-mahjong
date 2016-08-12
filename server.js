@@ -11,14 +11,14 @@ require("./choreographer");
 var //connect = require("connect"),
     fs = require("fs"),
     web = (typeof connect !== "undefined" ?
-            connect(connect.cookieParser(),
-                connect.session({
-                    secret: 'keyboard cat',
-                    cookie: {maxAge: 60000}
-                }),
-                connect.favicon(),
-                servStart) :
-            require("http").createServer(servStart)),
+        connect(connect.cookieParser(),
+            connect.session({
+                secret: 'keyboard cat',
+                cookie: {maxAge: 60000}
+            }),
+            connect.favicon(),
+            servStart) :
+        require("http").createServer(servStart)),
     newMajiang = require("./majiang").newMajiang,
     $ = require("./domizer").$,
     then,
@@ -44,19 +44,19 @@ server = (function (router) {
 
     $.gameLink = function gameLink(game, state, states) {
         return state === states.FINISHED ?
-                "Game Finished" :
-                $.div($.linkTo(joinSlashes(["/majiang", game, "stats"]),
-                        "Game ", game),
-                    " - ", state,
-                    " [", game.players.getLength(), " player(s)]",
-                    " - ",
-                    $.linkTo(joinSlashes([
-                        "/majiang",
-                        game,
-                        (state === states.OPEN ?
-                                "join" : "specjoin")
-                    ]), (state === states.OPEN ?
-                            "JOIN" : "SPECTATE")));
+            "Game Finished" :
+            $.div($.linkTo(joinSlashes(["/majiang", game, "stats"]),
+                "Game ", game),
+                " - ", state,
+                " [", game.players.getLength(), " player(s)]",
+                " - ",
+                $.linkTo(joinSlashes([
+                    "/majiang",
+                    game,
+                    (state === states.OPEN ?
+                        "join" : "specjoin")
+                ]), (state === states.OPEN ?
+                    "JOIN" : "SPECTATE")));
     };
 
     routes = {
@@ -80,17 +80,17 @@ server = (function (router) {
             var html =
                 $.standardHead("Welcome to SiChuan Mahjong",
                     $.body((function () {
-                        if (games.length) {
-                            return games.reduce(function (res, game) {
-                                if (game !== undefined) {
-                                    res.push($.gameLink(game, game.getState(), game.STATES));
-                                }
-                                return res;
-                            }, []).join("");
-                        } else {
-                            return $.div("No games");
-                        }
-                    }()),
+                            if (games.length) {
+                                return games.reduce(function (res, game) {
+                                    if (game !== undefined) {
+                                        res.push($.gameLink(game, game.getState(), game.STATES));
+                                    }
+                                    return res;
+                                }, []).join("");
+                            } else {
+                                return $.div("No games");
+                            }
+                        }()),
                         $.br(),
                         $.linkTo("/majiang", "New Game"),
                         $.javascript("/client.js")));
@@ -138,14 +138,14 @@ router.get.add(/^\/([^\.]+)\.([^\.]+$)/,
             var type;
 
             switch (ext) {
-            case "js":
-                type = "application/x-javascript";
-                break;
-            case "css":
-                type = "text/css";
-                break;
-            default:
-                throw "not authorized";
+                case "js":
+                    type = "application/x-javascript";
+                    break;
+                case "css":
+                    type = "text/css";
+                    break;
+                default:
+                    throw "not authorized";
             }
             fs.readFile("./static/" + file + "." + ext, function (err, content) {
                 try {
