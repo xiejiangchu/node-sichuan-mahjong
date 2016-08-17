@@ -47,6 +47,7 @@ GLOBAL.router = (function () {
         }
         return route;
     }
+
     ['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'TRACE', 'OPTIONS', 'CONNECT'].forEach(function (method) {
         routes[method] = [];
         //e.g. router.get('/foo/*',function(req,res,bar){});
@@ -88,9 +89,14 @@ GLOBAL.router = (function () {
     //404 is a route too
     router.notFound = function defaultNotFound(req, res) {
         res.writeHead(404, {
-            'Content-Type': 'text/html'
+            'Content-Type': 'text/html',
         });
-        res.end('<html><head><title>Error 404: Not Found</title></head><body>\n' + '<h1>Error 404: Not Found</h1>\n' + '<p>Cannot ' + req.method + ' ' + req.url + '</body></html>\n');
+        res.end('<html>' +
+            '<head>' +
+            '<meta charset="utf-8">' +
+            '<title>404: Not Found</title>' +
+            '</head>' +
+            '<body>\n' + '<h1>错误 404: Not Found</h1>\n' + '<p>Cannot ' + req.method + ' ' + req.url + '</body></html>\n');
     };
     return router;
 }());

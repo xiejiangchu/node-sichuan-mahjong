@@ -96,12 +96,24 @@ newTile = function (inSuit, inNumber) {
 
     return that.merge({
         /**/
-        "toString": function () { return number + " " + SUITS[suit]; },
-        "getSuit": function () { return suit; },
-        "getStringSuit": function () { return SUITS[suit]; },
-        "getNumber": function () { return number; },
-        "getTotal": function () { return kinships.length; },
-        "getAll": function () { return kinships; },
+        "toString": function () {
+            return number + " " + SUITS[suit];
+        },
+        "getSuit": function () {
+            return suit;
+        },
+        "getStringSuit": function () {
+            return SUITS[suit];
+        },
+        "getNumber": function () {
+            return number;
+        },
+        "getTotal": function () {
+            return kinships.length;
+        },
+        "getAll": function () {
+            return kinships;
+        },
         /**/
         "sameSuit": sameSuit,
         "sameNumber": sameNumber,
@@ -140,7 +152,7 @@ newWall = function (majiang, inId) {
             tile = tiles.splice(offset, 1)[0];
             if (tiles.length - currentOffset === 0) {
                 // majiang.broadcast("No tiles left in wall", id,
-                    // "at offset", currentOffset);
+                // "at offset", currentOffset);
                 majiang.setWall(next);
                 next.setOffset(0);
             }
@@ -152,11 +164,21 @@ newWall = function (majiang, inId) {
         /**/
         "tiles": tiles,
         /**/
-        "toString": function () { return id; },
-        "getOffset": function () { return currentOffset; },
-        "setOffset": function (inOffset) { currentOffset = inOffset; },
-        "getNext": function () { return next; },
-        "setNext": function (inNext) { next = inNext; },
+        "toString": function () {
+            return id;
+        },
+        "getOffset": function () {
+            return currentOffset;
+        },
+        "setOffset": function (inOffset) {
+            currentOffset = inOffset;
+        },
+        "getNext": function () {
+            return next;
+        },
+        "setNext": function (inNext) {
+            next = inNext;
+        },
         /**/
         "init": init,
         "addTile": addTile,
@@ -174,28 +196,27 @@ function buildAction(func, tile) {
 
 newPlayer = function (majiang, id, sessionID) {
     var that = {},
-
         ready,
-
         next,
         secret,
         tiles = [],
-        suits = [[], [], []],
+        suits = [
+            [],
+            [],
+            []
+        ],
         pulls = {},
         samesInHand = {},
         jiaos = {},
         hule,
         fen,
-
         output = [],
         buffer = [],
-
         routes,
         request,
         response,
         conNext,
         params,
-        
         waiting;
 
     function broadcast() {
@@ -321,11 +342,10 @@ newPlayer = function (majiang, id, sessionID) {
             threes = [],
             runs = [],
             prop;
-
         jiaos.clear();
         if (suits[0].length === 0 ||
-                suits[1].length === 0 ||
-                suits[2].length === 0) {
+            suits[1].length === 0 ||
+            suits[2].length === 0) {
             console.log("Player", id, "maybe HASJIAOS:");
             getJiaos(buff, hand, ones, twos, threes, runs);
         }
@@ -355,7 +375,8 @@ newPlayer = function (majiang, id, sessionID) {
     }
 
     function getTiniestSuit(empty) {
-        var min = 15, suit, zero = (empty !== undefined ? empty : 1);
+        var min = 15,
+            suit, zero = (empty !== undefined ? empty : 1);
 
         suits.each(function (el, i) {
             var len = el.length;
@@ -395,9 +416,10 @@ newPlayer = function (majiang, id, sessionID) {
                 tile = getFirstOfSuit(suit);
             }
             // broadcast("Did NOT get a secret");
-        } /*else {
-            // broadcast("GOT a secret");
-        }*/
+        }
+        /*else {
+         // broadcast("GOT a secret");
+         }*/
         return tile;
     }
 
@@ -420,8 +442,7 @@ newPlayer = function (majiang, id, sessionID) {
 
     function propagate(func, arg) {
         var next;
-        for (next = that.getNext();
-                next !== that; next = next.getNext()) {
+        for (next = that.getNext(); next !== that; next = next.getNext()) {
             next[func].call(next, arg);
             that[func].call(that, arg * -1);
         }
@@ -507,7 +528,8 @@ newPlayer = function (majiang, id, sessionID) {
     }
 
     function hasActionsOnHand(latest) {
-        var actions = [], action;
+        var actions = [],
+            action;
 
         if (latest && jiaos.hasOwnProperty(latest)) {
             actions.push(buildAction(ziMo, latest));
@@ -527,7 +549,8 @@ newPlayer = function (majiang, id, sessionID) {
     }
 
     function hasActionsOnTile(tile) {
-        var actions = [], total;
+        var actions = [],
+            total;
 
         if (tile.getSuit() !== SUITS[secret]) {
             total = getTileCount(tile);
@@ -603,43 +626,44 @@ newPlayer = function (majiang, id, sessionID) {
             console.log(["NOT FORKING", tile, mode].join(" "));
         }
         switch (mode) {
-        case "three":
-            buff.decrement(tile, 3);
-            hand.removeTile(tile);
-            hand.removeTile(tile);
-            threes.push(tile);
-            break;
-        case "pair":
-            buff.decrement(tile, 2);
-            hand.removeTile(tile);
-            twos.push(tile);
-            break;
-        case "run":
-            var run = getRun(tile, buff, hand);
+            case "three":
+                buff.decrement(tile, 3);
+                hand.removeTile(tile);
+                hand.removeTile(tile);
+                threes.push(tile);
+                break;
+            case "pair":
+                buff.decrement(tile, 2);
+                hand.removeTile(tile);
+                twos.push(tile);
+                break;
+            case "run":
+                var run = getRun(tile, buff, hand);
 
-            buff.decrement(tile);
-            buff.decrement(run[1]);
-            buff.decrement(run[2]);
-            hand.removeTile(run[1]);
-            hand.removeTile(run[2]);
-            runs.push(run);
-            break;
-        case "solo":
-            buff.decrement(tile);
-            ones.push(tile);
-            if (ones.length > 2) {
-                console.log("ABORTING, number of ones > 2, ones =", ones.length);
-                return;
-            }
-            break;
-        default:
-            throw "Error in getModeJiao, no such mode: " + mode;
+                buff.decrement(tile);
+                buff.decrement(run[1]);
+                buff.decrement(run[2]);
+                hand.removeTile(run[1]);
+                hand.removeTile(run[2]);
+                runs.push(run);
+                break;
+            case "solo":
+                buff.decrement(tile);
+                ones.push(tile);
+                if (ones.length > 2) {
+                    console.log("ABORTING, number of ones > 2, ones =", ones.length);
+                    return;
+                }
+                break;
+            default:
+                throw "Error in getModeJiao, no such mode: " + mode;
         }
         getJiaos(buff, hand, ones, twos, threes, runs);
     }
 
     function getJiaos(buff, hand, ones, twos, threes, runs) {
-        var tile, count, fork = false, left, run;
+        var tile, count, fork = false,
+            left, run;
 
         if (hand.length > 0) {
             console.log("Before hand:", hand.join(", "));
@@ -677,7 +701,7 @@ newPlayer = function (majiang, id, sessionID) {
                     jiaos[threes[0]] = "longqidui";
                 }
             } else if (left === 1 &&
-                    (twos.length === 0 || twos.length === 6)) {
+                (twos.length === 0 || twos.length === 6)) {
                 jiaos[ones[0]] = 1;
             } else if (left === 2 && twos.length === 1) {
                 console.log("Getting two cards jiaos");
@@ -702,7 +726,8 @@ newPlayer = function (majiang, id, sessionID) {
         }));
         broadcastOthers([
             "One player has actions",
-            "Waiting for response"].join("\n"));
+            "Waiting for response"
+        ].join("\n"));
         add("action", choices);
         waiting = true;
     }
@@ -832,7 +857,7 @@ newPlayer = function (majiang, id, sessionID) {
     function add(route, data) {
         var args = [];
         args[data && data.constructor === Array ?
-                "concat" : "push"](data);
+            "concat" : "push"](data);
         router.get.add(["/majiang", majiang.getId(), id, route],
             (function handleParamsClosure(callBack, data) {
                 return function handleParams(req, res, next) {
@@ -877,20 +902,44 @@ newPlayer = function (majiang, id, sessionID) {
         "pulls": pulls,
         "jiaos": jiaos,
         /**/
-        "toString": function () { return id; },
-        "getId": function () { return id; },
-        "getSessionID": function () { return sessionID; },
-        "isReady": function () { return ready === true; },
-        "setReady": function () { ready = true; },
-        "setNotReady": function () { ready = false; },
-        "getNext": function () { return next; },
-        "setNext": function (inNext) { next = inNext; },
-        "getSecret": function () { return secret; },
-        "getHuMode": function () { return hule; },
-        "isActive": function () { return hule === false; },
+        "toString": function () {
+            return id;
+        },
+        "getId": function () {
+            return id;
+        },
+        "getSessionID": function () {
+            return sessionID;
+        },
+        "isReady": function () {
+            return ready === true;
+        },
+        "setReady": function () {
+            ready = true;
+        },
+        "setNotReady": function () {
+            ready = false;
+        },
+        "getNext": function () {
+            return next;
+        },
+        "setNext": function (inNext) {
+            next = inNext;
+        },
+        "getSecret": function () {
+            return secret;
+        },
+        "getHuMode": function () {
+            return hule;
+        },
+        "isActive": function () {
+            return hule === false;
+        },
         "setInactive": setInactive,
         "setFen": setFen,
-        "getFen": function () { return fen; },
+        "getFen": function () {
+            return fen;
+        },
         /**/
         "init": init,
         "drawOne": drawOne,
@@ -921,10 +970,8 @@ var gameIdx = 0;
 
 newMajiang = function (server) {
     var that = {},
-
         id,
         state,
-
         routes,
         request,
         response,
@@ -1038,9 +1085,9 @@ newMajiang = function (server) {
         });
         // outputHands();
         // loop(4, function () {
-               // player.sort();
-            // player.computeSecret();
-            // player = player.getNext();
+        // player.sort();
+        // player.computeSecret();
+        // player = player.getNext();
         // });
     }
 
@@ -1076,8 +1123,7 @@ newMajiang = function (server) {
     function playersHaveActionsOnTile(tile) {
         var actions, next;
 
-        for (next = currentPlayer.getNext();
-                next !== currentPlayer; next = next.getNext()) {
+        for (next = currentPlayer.getNext(); next !== currentPlayer; next = next.getNext()) {
             actions = next.canHu(tile);
             if (actions.length > 0) {
                 return {
@@ -1086,8 +1132,7 @@ newMajiang = function (server) {
                 };
             }
         }
-        for (next = currentPlayer.getNext();
-                next !== currentPlayer; next = next.getNext()) {
+        for (next = currentPlayer.getNext(); next !== currentPlayer; next = next.getNext()) {
             actions = next.hasActionsOnTile(tile);
             if (actions.length > 0) {
                 return {
@@ -1135,10 +1180,10 @@ newMajiang = function (server) {
 
         if (choices) {
             // if (choices.player === players[HUMAN]) {
-                choices.player.askForAction(choices);
-                sendToAll();
+            choices.player.askForAction(choices);
+            sendToAll();
             // } else {
-                // playAction(choices.actions[0].func.pbind(tile), choices.player);
+            // playAction(choices.actions[0].func.pbind(tile), choices.player);
             // }
         } else {
             nextPlayer();
@@ -1160,22 +1205,22 @@ newMajiang = function (server) {
                 actions = currentPlayer.hasActionsOnHand(tile);
                 if (actions.length > 0) {
                     // if (currentPlayer === players[HUMAN]) {
-                        currentPlayer.askForAction({
-                            "player": currentPlayer,
-                            "actions": actions
-                        });
+                    currentPlayer.askForAction({
+                        "player": currentPlayer,
+                        "actions": actions
+                    });
                     // } else {
-                        // play(actions.shift().func);
-                        // setTimeout(play.pbind(actions.shift().func), 0);
+                    // play(actions.shift().func);
+                    // setTimeout(play.pbind(actions.shift().func), 0);
                     // }
                 } else {
                     // if (currentPlayer === players[HUMAN]) {
-                        currentPlayer.askForDiscard(response);
-                        sendToAll();
+                    currentPlayer.askForDiscard(response);
+                    sendToAll();
                     // } else {
-                        // tile = currentPlayer.getBestDiscard();
-                        // tile = currentPlayer.discard(tile);
-                        // routes.discard(currentPlayer, tile);
+                    // tile = currentPlayer.getBestDiscard();
+                    // tile = currentPlayer.discard(tile);
+                    // routes.discard(currentPlayer, tile);
                     // }
                 }
             } else {
@@ -1190,8 +1235,7 @@ newMajiang = function (server) {
                 }(player.jiaos.getKeys())));
             };
             printJiaos(currentPlayer);
-            for (next = currentPlayer.getNext();
-                    next !== currentPlayer; next = next.getNext()) {
+            for (next = currentPlayer.getNext(); next !== currentPlayer; next = next.getNext()) {
                 printJiaos(next);
             }
             stop();
@@ -1234,9 +1278,9 @@ newMajiang = function (server) {
 
     function spectate(sessionID) {
         // if (specs[sessionID]) {
-            writePlainResponse(response, output);
+        writePlainResponse(response, output);
         // } else {
-            // writePlainResponse(response, "You are not entitled to spectate this game");
+        // writePlainResponse(response, "You are not entitled to spectate this game");
         // }
     }
 
@@ -1255,15 +1299,15 @@ newMajiang = function (server) {
     }
 
     function setPlayerReady(player) {
-/*        if (players.each(function (player) {
-                    if (player.getSessionID === sessionID) {
-                        return true;
-                    }
-                })) {*/
+        /*        if (players.each(function (player) {
+         if (player.getSessionID === sessionID) {
+         return true;
+         }
+         })) {*/
         if (players[id]) {
             player.setReady();
         }
-/*        }*/
+        /*        }*/
     }
 
     function removePlayer(player) {
@@ -1325,17 +1369,19 @@ newMajiang = function (server) {
             state = STATES.OPEN;
 
             broadcast([
-                "Player " + player + " is NOT ready",
-                "Waiting for " + (4 - getReadyTotal()) +
-                    " player(s) to ready up"].join("\n"));
+                "Player " + player + " 未准备",
+                "等待 " + (4 - getReadyTotal()) +
+                " player(s) 准备"
+            ].join("\n"));
             sendToAll();
         },
         "ready": function handleReady(player) {
             if (getReadyTotal() === 4) {
                 state = STATES.READY;
                 broadcast([
-                    "Player " + player + " is ready",
-                    "All players are ready, game starting"].join("\n"));
+                    "Player " + player + " 已准备",
+                    "所有选手准备完毕，游戏开始"
+                ].join("\n"));
                 buildGame();
                 broadcast(JSON.stringify({
                     "route": "secret",
@@ -1343,9 +1389,10 @@ newMajiang = function (server) {
                 }));
             } else {
                 broadcast([
-                    "Player " + player + " is ready",
-                    "Waiting for " + (4 - getReadyTotal()) +
-                        " player(s) to ready up"].join("\n"));
+                    "Player " + player + " 已准备",
+                    "等待" + (4 - getReadyTotal()) +
+                    " player(s) 准备"
+                ].join("\n"));
             }
             sendToAll();
         },
@@ -1354,7 +1401,7 @@ newMajiang = function (server) {
         },
         "leave": function handleLeave(player) {
             if (removePlayer(player)) {
-                broadcast("Player " + player + " just left the game, ID:" + id);
+                broadcast("Player " + player + " , ID:" + id);
                 player.send();
                 if (players.getLength() === 0) {
                     emit("leave");
@@ -1388,11 +1435,12 @@ newMajiang = function (server) {
             }
             player.print([
                 "Joined Game, ID:" + id,
-                "Player added, ID:" + player].join("\n"));
+                "Player added, ID:" + player
+            ].join("\n"));
             broadcastOthers(["Player", player, "joined the game"].join(" "), player);
             broadcast(players.getLength() === 4 ?
-                    "Game Ready" :
-                    ("Waiting for " + (4 - players.getLength()) + " other player(s) to join"));
+                "Game Ready" :
+                ("Waiting for " + (4 - players.getLength()) + " other player(s) to join"));
             sendToAll();
         },
         "stats": function handleStats() {
@@ -1457,7 +1505,7 @@ newMajiang = function (server) {
             walls.push(newWall(that, id));
         });
         // loop(4, function (id) {
-            // players.push(newPlayer(that, id));
+        // players.push(newPlayer(that, id));
         // });
 
         add("stats");
@@ -1488,18 +1536,38 @@ newMajiang = function (server) {
         "players": players,
         "STATES": STATES,
         // accessors
-        "toString": function () { return id; },
-        "getId": function () { return id; },
-        "getState": function () { return state; },
-        "setState": function (inState) { state = inState; },
-        "getDong": function () { return dong; },
-        "getPlayer": function () { return currentPlayer; },
-        "setPlayer": function (inPlayer) { currentPlayer = inPlayer; },
-        "getWall": function () { return currentWall; },
-        "setWall": function (inCurrentWall) { currentWall = inCurrentWall; },
+        "toString": function () {
+            return id;
+        },
+        "getId": function () {
+            return id;
+        },
+        "getState": function () {
+            return state;
+        },
+        "setState": function (inState) {
+            state = inState;
+        },
+        "getDong": function () {
+            return dong;
+        },
+        "getPlayer": function () {
+            return currentPlayer;
+        },
+        "setPlayer": function (inPlayer) {
+            currentPlayer = inPlayer;
+        },
+        "getWall": function () {
+            return currentWall;
+        },
+        "setWall": function (inCurrentWall) {
+            currentWall = inCurrentWall;
+        },
         "getWallsTotal": getWallsTotal,
         "getReadyTotal": getReadyTotal,
-        "setHttpResponse": function (res) { response = res; },
+        "setHttpResponse": function (res) {
+            response = res;
+        },
         // methods
         "stop": stop,
         "start": start,

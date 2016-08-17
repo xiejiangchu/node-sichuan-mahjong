@@ -1,9 +1,8 @@
-var gameId,
-    playerId,
-    action,
-    tile,
-
-    events = {};
+var gameId;
+var playerId;
+var action;
+var tile;
+var events = {};
 
 Object.prototype.each = function each(func) {
     var prop, ret;
@@ -46,7 +45,7 @@ function joinSlashes() {
 }
 
 function buildOptions(arr) {
-    var options = ["<option></option>"];
+    var options = ["<option>请选择</option>"];
 
     return options.concat(arr.map(function (tile) {
         return "<option>" + tile + "</option>";
@@ -82,7 +81,7 @@ function ajaxRequest(command, callback) {
                 // try {
                 callback(xhr.responseText);
                 // } catch (e) {
-                    // console.log(e);
+                // console.log(e);
                 // }
             } else if (xhr.status === 0) {
                 pollFor(undefined, callback);
@@ -124,7 +123,8 @@ function pollFor(response, callback) {
 }
 
 function handleResponse(response) {
-    var arr = response.split("\n").reverse(), elements,
+    var arr = response.split("\n").reverse(),
+        elements,
         result;
 
     if (!arr[0].startsWith("Waiting")) {
@@ -145,9 +145,9 @@ function sendMessage(event) {
     try {
         if (responseSelect.value) {
             ajaxRequest(action + "?" +
-                    (action === "action" ?
-                        "choice" : "tile") +
-                    "=" + responseSelect.value,
+                (action === "action" ?
+                    "choice" : "tile") +
+                "=" + responseSelect.value,
                 handleResponse);
         }
     } catch (e) {
@@ -206,7 +206,7 @@ function handleJoin(response) {
     var arr = response.split("\n");
 
     if (arr[0] &&
-            arr[0].startsWith("Joined Game")) {
+        arr[0].startsWith("Joined Game")) {
         gameId = arr[0].match(/\d+$/)[0];
         playerId = arr[1].match(/\d+$/)[0];
         pollFor(response, setReady);
@@ -217,13 +217,11 @@ function handleJoin(response) {
 function handleNewGame(response) {
     var arr = response.split("\n");
 
-    if (arr[0] &&
-            (arr[0].startsWith("Game Created"))) {
+    if (arr[0] && (arr[0].startsWith("Game Created"))) {
         gameId = arr[0].match(/\d+$/)[0];
         output(arr.reverse().join("\n"));
         output("Joining Game " + gameId + "...");
         ajaxRequest("join", handleJoin);
-
         responseSelect.addEvent("change", sendSecret, false);
     }
 }
@@ -231,7 +229,6 @@ function handleNewGame(response) {
 function newGame(event) {
     try {
         responseSelect.removeEvent("change");
-
         serverResponse.value = "";
         gameId = "";
         playerId = "";
@@ -258,11 +255,8 @@ function listGames(event) {
         responseSelect.removeEvent("change");
 
         ajaxRequest("/games", function (response) {
-            var arr = response.split("\n"),
-                games = "<option></option>" + arr.map(function (el) {
-                    return "<option>" + el + "</option>";
-                }).join("");
-
+            var arr = response.split("\n");
+            var games = buildOptions(arr);
             responseSelect.innerHTML = games;
         });
         responseSelect.addEvent("change", sendJoin, false);

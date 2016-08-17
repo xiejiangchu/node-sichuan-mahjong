@@ -1,9 +1,9 @@
 function loadLibrary(library) {
     function addFunctionToObj(object, func, name) {
         if (object !== undefined &&
-                func !== undefined &&
-                name !== undefined &&
-                object[name] === undefined) {
+            func !== undefined &&
+            name !== undefined &&
+            object[name] === undefined) {
             object[name] = func;
         }
     }

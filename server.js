@@ -1,28 +1,22 @@
-/*global console*/
-
-function servStart() {
-    router.apply(this, arguments);
-}
-
+var fs = require("fs");
 require("./commons");
 require("./choreographer");
 
-// HTTP Server 
-var //connect = require("connect"),
-    fs = require("fs"),
-    web = (typeof connect !== "undefined" ?
-        connect(connect.cookieParser(),
-            connect.session({
-                secret: 'keyboard cat',
-                cookie: {maxAge: 60000}
-            }),
-            connect.favicon(),
-            servStart) :
-        require("http").createServer(servStart)),
-    newMajiang = require("./majiang").newMajiang,
-    $ = require("./domizer").$,
-    then,
-    server;
+function requestListener() {
+    router.apply(this, arguments);
+}
+var web = (typeof connect !== "undefined" ?
+    connect(connect.cookieParser(),
+        connect.session({
+            secret: 'keyboard cat',
+            cookie: {maxAge: 60000}
+        }),
+        connect.favicon(),
+        requestListener) :
+    require("http").createServer(requestListener));
+var newMajiang = require("./majiang").newMajiang;
+var $ = require("./domizer").$;
+var server;
 
 server = (function (router) {
     var that = {},
@@ -43,8 +37,7 @@ server = (function (router) {
     }
 
     $.gameLink = function gameLink(game, state, states) {
-        return state === states.FINISHED ?
-            "Game Finished" :
+        return state === states.FINISHED ? "Game Finished" :
             $.div($.linkTo(joinSlashes(["/majiang", game, "stats"]),
                 "Game ", game),
                 " - ", state,
@@ -68,7 +61,6 @@ server = (function (router) {
         },
         "majiang": function handleMajiang() {
             var game = newMajiang(that);
-
             game.add("join");
             games[game] = game;
             writePlainResponse(response, [
@@ -78,7 +70,7 @@ server = (function (router) {
         },
         "home": function handleHome() {
             var html =
-                $.standardHead("Welcome to SiChuan Mahjong",
+                $.standardHead("欢迎来到四川麻将",
                     $.body((function () {
                             if (games.length) {
                                 return games.reduce(function (res, game) {
@@ -88,13 +80,12 @@ server = (function (router) {
                                     return res;
                                 }, []).join("");
                             } else {
-                                return $.div("No games");
+                                return $.div("没有游戏");
                             }
                         }()),
                         $.br(),
-                        $.linkTo("/majiang", "New Game"),
+                        $.linkTo("/majiang", "新游戏"),
                         $.javascript("/client.js")));
-            // console.log(html);
             writeHtmlResponse(response, html);
         }
     };
@@ -119,6 +110,7 @@ server = (function (router) {
         add("home");
         add("majiang");
         add("games");
+        add("leave");
     }());
 
     return that.merge({
@@ -153,16 +145,13 @@ router.get.add(/^\/([^\.]+)\.([^\.]+$)/,
                         throw err;
                     }
                     if (content) {
-                        // console.log("GET", file + "." + ext + ": OK");
                         writeResponse(res, type, content);
                     }
                 } catch (e) {
-                    // console.log("GET", file + "." + ext + ": Not authorized");
                     router.notFound(req, res);
                 }
             });
         } catch (e) {
-            // console.log("GET", file + "." + ext + ": Not authorized");
             router.notFound(req, res);
         }
     });
@@ -170,26 +159,26 @@ router.get.add(/^\/([^\.]+)\.([^\.]+$)/,
 router.get.add("/",
     function handleUI(req, res, next) {
         var html =
-            $.standardHead("Welcome to SiChuan Mahjong",
+            $.standardHead("欢饮来到四川麻将",
                 $.body(
-                    $.form({id: "responseForm"},
+                    $.form({id: "responseForm", style: "margin:10px auto;"},
                         $.input({
                             id: "newGameButton",
                             type: "button",
-                            value: "New Game"
+                            value: "新游戏"
                         }, ""),
                         $.input({
                             id: "getGamesButton",
                             type: "button",
-                            value: "List Games"
+                            value: "游戏列表"
                         }, ""),
                         $.select({
                             id: "responseSelect",
-                            value: "Select one..."
+                            value: "选择"
                         }, "")),
                     $.textarea({
                         id: "serverResponse",
-                        style: "width:90%; height:90%;"
+                        style: "width:50%; height:50%;margin:10px auto;"
                     }, ""),
                     $.javascript({}, "/client.js")
                 ));
